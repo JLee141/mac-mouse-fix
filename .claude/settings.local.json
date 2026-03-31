@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(find /Users/jlee/Documents/Dev_Stuff/mac-mouse-fix -name *.xcstrings)",
-      "Bash(find /Users/jlee/Documents/Dev_Stuff/mac-mouse-fix -type d -name *.app)"
+      "Bash(find /Users/jlee/Documents/Dev_Stuff/mac-mouse-fix -type d -name *.app)",
+      "Bash(git log:*)"
     ]
   }
 }

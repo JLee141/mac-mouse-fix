@@ -303,6 +303,8 @@ class GeneralTabController: NSViewController {
         toggle.font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
         toggle.translatesAutoresizingMaskIntoConstraints = false
         toggle.setAccessibilityIdentifier("axOpenAtLoginToggle")
+        toggle.setContentHuggingPriority(.init(750), for: .vertical)
+        toggle.setContentCompressionResistancePriority(.init(1000), for: .vertical)
 
         /// Set initial state
         toggle.state = (service.status == .enabled) ? .on : .off
@@ -339,6 +341,10 @@ class GeneralTabController: NSViewController {
     private func createDivider() -> NSView {
         let container = NSView()
         container.translatesAutoresizingMaskIntoConstraints = false
+        /// Match storyboard divider hugging priorities to prevent infinite growth
+        /// during TabViewController's 99999pt measurement phase
+        container.setContentHuggingPriority(.init(999), for: .vertical)
+        container.setContentCompressionResistancePriority(.init(1000), for: .vertical)
 
         let separator = NSBox()
         separator.boxType = .separator

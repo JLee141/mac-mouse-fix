@@ -47,23 +47,14 @@ These links go to Noah and the upstream project, not to this fork:
 - Tip Noah: [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ARSTVR6KFB524&source=url&lc=en_US)
 - Sponsor Noah: [GitHub Sponsors](https://github.com/sponsors/noah-nuebling)
 
-## Development
-
-This repo is mainly intended to be built from source.
-
-
 ## Attribution and scope
 
 To be completely clear:
 
 - Noah Nuebling created Mac Mouse Fix and deserves primary credit for the original app
-- This fork would not exist without Noah's work
 - JLee is responsible for the remix-specific changes made in this repository after the fork point
 - If a section, asset, or system still matches upstream, credit belongs to upstream
-
-## Thanks
-
-Thank you, Noah, for building Mac Mouse Fix and releasing the work that made this fork possible!
+- Thank you, Noah, for building Mac Mouse Fix and releasing the work that made this fork possible!
 
 ## License
 
