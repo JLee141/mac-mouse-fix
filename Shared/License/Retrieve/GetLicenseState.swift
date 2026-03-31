@@ -15,6 +15,13 @@ import CryptoKit
     /// -> This class retrieves instances of the `MFLicenseState` dataclass
     
     static func get_Preliminary(_callingFunc: String = #function) -> MFLicenseState {
+        #if MMF_REMIX_LICENSE_FREE
+        let forcedLicenseState = MFLicenseState(isLicensed: true,
+                                                freshness: kMFValueFreshnessFresh,
+                                                licenseTypeInfo: MFLicenseTypeInfoForce())
+        DDLogInfo("GetLicenseState.get_Preliminary(): \(forcedLicenseState)\ncaller: \(_callingFunc)")
+        return forcedLicenseState
+        #endif
         
         /// This is a quick, preliminary way to get the licenseState, that's intended to render the UI immediately upon app-startup with probably-correct data.
         /// Note:
@@ -31,6 +38,13 @@ import CryptoKit
     }
     
     public static func get(_callingFunc: String = #function) async -> MFLicenseState { assert(Thread.isMainThread)
+        #if MMF_REMIX_LICENSE_FREE
+        let forcedLicenseState = MFLicenseState(isLicensed: true,
+                                                freshness: kMFValueFreshnessFresh,
+                                                licenseTypeInfo: MFLicenseTypeInfoForce())
+        DDLogInfo("GetLicenseState.get(): \(forcedLicenseState)\ncaller: \(_callingFunc)")
+        return forcedLicenseState
+        #endif
         
         /// This function determines the current licenseState of the application.
         ///     To do this, it checks the `licenseServer`, `cache`, `fallback` values, and `special conditions`
@@ -133,6 +147,11 @@ import CryptoKit
     /// Server/cache/fallback/overrides interfaces
     
     public static func licenseStateFromOverrides() async -> MFLicenseState? { assert(Thread.isMainThread)
+        #if MMF_REMIX_LICENSE_FREE
+        return MFLicenseState(isLicensed: true,
+                              freshness: kMFValueFreshnessFresh,
+                              licenseTypeInfo: MFLicenseTypeInfoForce())
+        #endif
         
         /// Old notes:
         ///     - (This note is totally outdated as of Oct 2024 ->) Instead of using a licenseReason, we could also pass that info through the error. That might be better since we'd have one less argument and the the errors can also contain dicts with custom info. Maybe you could think about the error as it's used currently as the "unlicensed reason" (Update: LicenseReason has been removed and merged into MFLicenseTypeInfo. Current system is nice. No need to merge everything into errors I think.)

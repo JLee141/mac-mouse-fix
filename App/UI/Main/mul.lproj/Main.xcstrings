@@ -2,7 +2,7 @@
   "sourceLanguage" : "en",
   "strings" : {
     "1dS-BH-DIv.title" : {
-      "comment" : "Class = \"NSViewController\"; title = \"Pointer\"; ObjectID = \"1dS-BH-DIv\"; Note = \"Toolbar > Pointer Tab Title\";",
+      "comment" : "Class = \"NSViewController\"; title = \"Exceptions\"; ObjectID = \"1dS-BH-DIv\"; Note = \"Toolbar > Pointer Tab Title\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "de" : {
@@ -14,7 +14,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Pointer"
+            "value" : "Exceptions"
           }
         },
         "fr" : {
@@ -2574,7 +2574,7 @@
     },
     "d0g-07-PaJ.title" : {
       "comment" : "Class = \"NSMenuItem\"; title = \"Buy Mac Mouse Fix...\"; ObjectID = \"d0g-07-PaJ\"; Note = \"Main Menu > Mac Mouse Fix > Buy Mac Mouse Fix...\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
@@ -4998,7 +4998,7 @@
       }
     },
     "lLu-45-nE3.label" : {
-      "comment" : "Class = \"NSTabViewItem\"; label = \"Pointer\"; ObjectID = \"lLu-45-nE3\"; Note = \"Toolbar > Pointer Tab Button\";",
+      "comment" : "Class = \"NSTabViewItem\"; label = \"Exceptions\"; ObjectID = \"lLu-45-nE3\"; Note = \"Toolbar > Pointer Tab Button\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "de" : {
@@ -5010,7 +5010,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Pointer"
+            "value" : "Exceptions"
           }
         },
         "fr" : {
@@ -7968,7 +7968,7 @@
     },
     "YBT-Ar-F4S.title" : {
       "comment" : "Class = \"NSMenuItem\"; title = \"Activate License...\"; ObjectID = \"YBT-Ar-F4S\"; Note = \"Main Menu > Mac Mouse Fix > Activate License...\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "cs" : {
           "stringUnit" : {

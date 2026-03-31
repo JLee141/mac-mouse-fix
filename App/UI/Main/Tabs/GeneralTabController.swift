@@ -43,10 +43,15 @@ class GeneralTabController: NSViewController {
     @IBOutlet weak var menuBarHint: NSTextField!
     
     /// Init
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
+        /// Insert "Open at Login" toggle (macOS 13+ only, requires SMAppService)
+        if #available(macOS 13.0, *) {
+            setupOpenAtLoginToggle()
+        }
+
         /// Determine width for this tab
         applyHardcodedTabWidth("general", self, widthControllingTextFields: [enabledHint, updatesHint, menuBarHint]);
         
@@ -284,6 +289,71 @@ class GeneralTabController: NSViewController {
                 SUUpdater.shared().checkForUpdatesInBackground()
             }
         }
+    }
+
+    // MARK: Open at Login
+
+    @available(macOS 13.0, *)
+    private func setupOpenAtLoginToggle() {
+
+        let service = SMAppService.mainApp
+
+        /// Create checkbox
+        let toggle = NSButton(checkboxWithTitle: NSLocalizedString("open-at-login.title", value: "Open at Login", comment: "General > Open at Login Toggle"), target: nil, action: nil)
+        toggle.font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
+        toggle.translatesAutoresizingMaskIntoConstraints = false
+        toggle.setAccessibilityIdentifier("axOpenAtLoginToggle")
+
+        /// Set initial state
+        toggle.state = (service.status == .enabled) ? .on : .off
+
+        /// Find insertion point: after the menu bar hint (menuBarHint's superview)
+        if let menuBarHintContainer = menuBarHint.superview,
+           let stackView = mainHidableSection,
+           let index = stackView.arrangedSubviews.firstIndex(of: menuBarHintContainer) {
+
+            /// Insert a divider
+            let divider = createDivider()
+            stackView.insertArrangedSubview(divider, at: index + 1)
+
+            /// Insert the toggle
+            stackView.insertArrangedSubview(toggle, at: index + 2)
+        }
+
+        /// Handle toggle changes
+        toggle.reactive.boolValues.observeValues { shouldOpen in
+            do {
+                if shouldOpen {
+                    try service.register()
+                } else {
+                    try service.unregister()
+                }
+            } catch {
+                DDLogError("Failed to \(shouldOpen ? "register" : "unregister") login item: \(error)")
+                /// Revert toggle on failure
+                toggle.state = (service.status == .enabled) ? .on : .off
+            }
+        }
+    }
+
+    private func createDivider() -> NSView {
+        let container = NSView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+
+        let separator = NSBox()
+        separator.boxType = .separator
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(separator)
+
+        NSLayoutConstraint.activate([
+            separator.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            separator.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            separator.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
+            separator.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
+            container.heightAnchor.constraint(equalToConstant: 17),
+        ])
+
+        return container
     }
 }
 

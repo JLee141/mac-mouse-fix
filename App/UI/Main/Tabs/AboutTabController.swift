@@ -86,6 +86,13 @@ class AboutTabController: NSViewController {
         /// Store self in MainAppState for global access
         
         MainAppState.shared.aboutTabController = self
+
+        creditsField.stringValue = "Remixed by \(remixAuthorName)"
+        
+        #if MMF_REMIX_LICENSE_FREE
+        configureLicenseFreeUI()
+        return
+        #endif
         
         // TODO: Links to Acknowledgements, Readme and Website should probably be localized.
         
@@ -99,8 +106,6 @@ class AboutTabController: NSViewController {
         let versionFormatExists = versionFormat.count != 0 && versionFormat != "app-version"
         let versionNumbers = "\(Locator.bundleVersionShort()) (\(Locator.bundleVersion()))"
         versionField.stringValue = versionFormatExists ? String(format: versionFormat, versionNumbers) : versionNumbers
-        
-        creditsField.stringValue = "Remixed by \(remixAuthorName)"
         
         /// Init trialSectionManager
         ///     The manager swaps out the trialSection and stuff, so always access the trialSection through the manager!
@@ -135,6 +140,10 @@ class AboutTabController: NSViewController {
     /// Did appear
     
     override func viewDidAppear() {
+        #if MMF_REMIX_LICENSE_FREE
+        return
+        #endif
+        
         /// Step 2: Get real values and update UI
         ///     Notes:
         ///         - Why are we doing step 2 in viewDidAppear() and step 1 in viewDidLoad()?
@@ -142,6 +151,54 @@ class AboutTabController: NSViewController {
         ///             Testing: [Jan 2025] seems like the two calls are a few hundred ms apart, so debouncing is prolly not the best choice?
         
         updateUIToCurrentLicense()
+    }
+    
+    private func configureLicenseFreeUI() {
+        
+        versionField.stringValue = ""
+        versionField.isHidden = true
+        
+        centerAcknowledgementsRow()
+        moneyCell.removeFromSuperview()
+        
+        trialCell.imageView?.isHidden = true
+        trialCell.imageView?.image = nil
+        trialCell.textField?.alignment = .center
+        trialCell.textField?.stringValue = "License-free remix build"
+        
+        currentIsLicensed = true
+    }
+    
+    private func centerAcknowledgementsRow() {
+        
+        guard
+            let linkRow = moneyCell.superview,
+            let acknowledgementsCell = linkRow.subviews.first(where: { $0 !== moneyCell })
+        else {
+            return
+        }
+        
+        let constraintsToDeactivate = linkRow.constraints.filter { constraint in
+            let firstItem = constraint.firstItem as AnyObject?
+            let secondItem = constraint.secondItem as AnyObject?
+            let touchesMoneyCell = firstItem === moneyCell || secondItem === moneyCell
+            let touchesAcknowledgementsCell = firstItem === acknowledgementsCell || secondItem === acknowledgementsCell
+            let controlsHorizontalPlacement =
+                constraint.firstAttribute == .leading ||
+                constraint.firstAttribute == .trailing ||
+                constraint.firstAttribute == .centerX ||
+                constraint.secondAttribute == .leading ||
+                constraint.secondAttribute == .trailing ||
+                constraint.secondAttribute == .centerX
+            
+            return touchesMoneyCell || (touchesAcknowledgementsCell && controlsHorizontalPlacement)
+        }
+        
+        NSLayoutConstraint.deactivate(constraintsToDeactivate)
+        
+        NSLayoutConstraint.activate([
+            acknowledgementsCell.centerXAnchor.constraint(equalTo: linkRow.centerXAnchor)
+        ])
     }
     
     /// Update UI

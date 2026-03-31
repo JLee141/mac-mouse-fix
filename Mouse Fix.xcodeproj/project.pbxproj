@@ -8195,7 +8195,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\nif [ \"${CONFIGURATION}\" = \"Release\" ]; then # Only increment in release builds to prevent annoying churn in git history [Nov 12 2025]\n    # Notes:\n    # - We're storing the `version` (aka build number) directly inside the info plist so that we can increment it here. The `shortVersion` (such as 3.0.1) is instead stored inside the Xcode project under General > Identity > Version\n    buildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\")\n    buildNumber=$((buildNumber+1))\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\nfi\n";
+			shellScript = "\n# This remix fork uses manually managed date-based versions.\n# Keep the build number stable instead of auto-incrementing it in release builds.\n";
 		};
 		4FD148D928AA45FE00FE688C /* Not BartyCrouch */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -8233,7 +8233,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\n# I originally made this because sometimes I get crashlogs of the Helper which just say -1 for the version.\n# Now I'm trying to use the build number to check if an instance of the Helper and an instance of the mainApp belong together.\n# Note: Where do INFOPLIST_FILE_MAINAPP and INFOPLIST_FILE_HELPER come from?\n\n# Get versions from Main App\nversion=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${PROJECT_DIR}/${INFOPLIST_FILE_MAINAPP}\")\nshortVersion=$(/usr/libexec/PlistBuddy -c \"Print CFBundleShortVersionString\" \"${PROJECT_DIR}/${INFOPLIST_FILE_MAINAPP}\")\n\nif [ \"${CONFIGURATION}\" = \"Release\" ]; then # [Nov 12 2025]\n    $((version++)) \n    # ^ Because we'll also be incrementing Main App version when it builds\n    #   Can't get any build phase from Main App to run before the Helper is compiled. Otherwise we wouldn't need to do this. We could increment the Main App version and then simply copy it over.\n    #   For some reason is not always in sync with the Main App version. I saw it lag one behind. I think it might have to do with Xcode optimizing builds and not always running this if the Helper hasn't changed, but not sure.\n    #   Edit: I think I fixed the bug where the Helper build number is lagging behind the main app build number by simply moving the \"Copy Version From Main App\" build phase up - ergo executing it before other build phases. Previously it was the last build phase that was executed.\nfi\n\n# Set versions to Helper\n/usr/libexec/PlistBuddy -c \"Set CFBundleVersion ${version}\" \"${PROJECT_DIR}/${INFOPLIST_FILE_HELPER}\"\n/usr/libexec/PlistBuddy -c \"Set CFBundleShortVersionString ${shortVersion}\" \"${PROJECT_DIR}/${INFOPLIST_FILE_HELPER}\"\n";
+			shellScript = "\n# Keep the helper version exactly aligned with the main app for this remix fork.\n# Note: INFOPLIST_FILE_MAINAPP and INFOPLIST_FILE_HELPER are provided by the build settings.\n\nversion=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${PROJECT_DIR}/${INFOPLIST_FILE_MAINAPP}\")\nshortVersion=$(/usr/libexec/PlistBuddy -c \"Print CFBundleShortVersionString\" \"${PROJECT_DIR}/${INFOPLIST_FILE_MAINAPP}\")\n\n/usr/libexec/PlistBuddy -c \"Set CFBundleVersion ${version}\" \"${PROJECT_DIR}/${INFOPLIST_FILE_HELPER}\"\n/usr/libexec/PlistBuddy -c \"Set CFBundleShortVersionString ${shortVersion}\" \"${PROJECT_DIR}/${INFOPLIST_FILE_HELPER}\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -8853,6 +8853,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"IS_MAIN_APP=1",
+					"MMF_REMIX_LICENSE_FREE=1",
 				);
 				INFOPLIST_FILE = App/SupportFiles/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -8861,13 +8862,13 @@
 					"$(PROJECT_DIR)/Frameworks/**",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15.0;
-				MARKETING_VERSION = "3.1.0 Beta 1";
+				MARKETING_VERSION = 2026.3.31;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.nuebling.mac-mouse-fix";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) IS_MAIN_APP";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) IS_MAIN_APP MMF_REMIX_LICENSE_FREE";
 				SWIFT_OBJC_BRIDGING_HEADER = "App/SupportFiles/Mac Mouse Fix-Bridging-Header.h";
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -8896,6 +8897,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"IS_MAIN_APP=1",
+					"MMF_REMIX_LICENSE_FREE=1",
 				);
 				INFOPLIST_FILE = App/SupportFiles/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -8904,12 +8906,12 @@
 					"$(PROJECT_DIR)/Frameworks/**",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15.0;
-				MARKETING_VERSION = "3.1.0 Beta 1";
+				MARKETING_VERSION = 2026.3.31;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.nuebling.mac-mouse-fix";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) IS_MAIN_APP";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) IS_MAIN_APP MMF_REMIX_LICENSE_FREE";
 				SWIFT_OBJC_BRIDGING_HEADER = "App/SupportFiles/Mac Mouse Fix-Bridging-Header.h";
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -9128,6 +9130,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"IS_HELPER=1",
+					"MMF_REMIX_LICENSE_FREE=1",
 					"NO_FILTER=1",
 				);
 				INFOPLIST_FILE = Helper/SupportFiles/Info.plist;
@@ -9137,11 +9140,12 @@
 					"$(PROJECT_DIR)/Frameworks/**",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15.0;
+				MARKETING_VERSION = 2026.3.31;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.nuebling.mac-mouse-fix.helper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) IS_HELPER";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) IS_HELPER MMF_REMIX_LICENSE_FREE";
 				SWIFT_OBJC_BRIDGING_HEADER = "Helper/SupportFiles/Mac Mouse Fix Helper-Bridging-Header.h";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
@@ -9173,6 +9177,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"IS_HELPER=1",
+					"MMF_REMIX_LICENSE_FREE=1",
 					"NO_FILTER=1",
 				);
 				INFOPLIST_FILE = Helper/SupportFiles/Info.plist;
@@ -9182,11 +9187,12 @@
 					"$(PROJECT_DIR)/Frameworks/**",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15.0;
+				MARKETING_VERSION = 2026.3.31;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.nuebling.mac-mouse-fix.helper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) IS_HELPER";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) IS_HELPER MMF_REMIX_LICENSE_FREE";
 				SWIFT_OBJC_BRIDGING_HEADER = "Helper/SupportFiles/Mac Mouse Fix Helper-Bridging-Header.h";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (

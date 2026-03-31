@@ -486,9 +486,7 @@ import ReactiveSwift
     }
     
     private func appFilterAllowsDefaultScrollModifications(bundleIdentifier: String?) -> Bool {
-        
-        let mode = (config("Scroll.appFilter.mode") as? String) ?? "off"
-        
+
         let bundleIDs: [String] = {
             if let raw = config("Scroll.appFilter.bundleIDs") as? [String] {
                 return raw
@@ -503,15 +501,7 @@ import ReactiveSwift
         }()
         
         let isListed = bundleIdentifier.map(bundleIDs.contains) ?? false
-        
-        switch mode {
-        case "excludeListed":
-            return !isListed
-        case "includeListed":
-            return isListed
-        default:
-            return true
-        }
+        return !isListed
     }
     
     //

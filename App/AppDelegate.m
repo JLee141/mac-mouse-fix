@@ -43,11 +43,17 @@
 }
 
 - (IBAction)activateLicense:(id)sender {
+#if MMF_REMIX_LICENSE_FREE
+    [self openAboutTab:sender];
+#else
     [LicenseSheetController add];
+#endif
 }
 
 - (IBAction)buyMMF:(id)sender {
-    
+#if MMF_REMIX_LICENSE_FREE
+    [self openAboutTab:sender];
+#else
     [GetLicenseConfig getWith_callingFunc:NSStringFromSelector(_cmd) completionHandler:^(MFLicenseConfig * _Nonnull licenseConfig) {
             
         NSLocale *locale = NSLocale.currentLocale;
@@ -55,6 +61,7 @@
         
         [LicenseUtility buyMMFWithLicenseConfig:licenseConfig locale:locale useQuickLink:useQuickLink];
     }];
+#endif
 }
 
 
@@ -97,8 +104,12 @@
     if ([path isEqual:@"activate"]) {
         
         /// Open the license activation UI
-        
+
+#if MMF_REMIX_LICENSE_FREE
+        [self openAboutTab:nil];
+#else
         [LicenseSheetController add];
+#endif
         
     } else if ([path isEqual:@"disable"]) {
         

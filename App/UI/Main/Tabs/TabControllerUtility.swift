@@ -71,6 +71,20 @@ func applyHardcodedTabWidth(_ tabName: String, _ tabController: NSViewController
                     "ru": 350,  /// 350 -> Bit more breathing room than 340. String `Прокручивайте точно...` has orphaned word, but inserting &nbsp; or making the tab wider (min 400) looks worse. [Dec 2025]
                     "es": 390,  /// 370 -> Stops "Modificadores de teclado:" labels from being cut off.  390 -> "Desplázate con precisión..." is on 2 lines instead of 3. [Dec 2025]
                 ]
+            case "exceptions":
+                map = [
+                    "en": 340,
+                    "zh": 330,
+                    "fr": 360,
+                    "de": 340,
+                    "ko": 330,
+                    "pt": 370,
+                    "vi": 340,
+                    "cs": 340,
+                    "tr": 380,
+                    "ru": 350,
+                    "es": 390,
+                ]
             default:
                 fatalError("Calling this from unexpected tab: \(tabController)")
         }

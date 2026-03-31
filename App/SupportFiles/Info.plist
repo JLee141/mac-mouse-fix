@@ -34,11 +34,11 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>24830</string>
+	<string>20260331</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.utilities</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2019-2023 Noah Nuebling (MMF License); Remix © 2026 JLee</string>
+	<string>Copyright © 2019-2023 Noah Nuebling; Remix © 2026 JLee</string>
 	<key>NSMainStoryboardFile</key>
 	<string>Main</string>
 	<key>NSPrincipalClass</key>
