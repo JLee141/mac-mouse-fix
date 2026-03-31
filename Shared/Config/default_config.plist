@@ -4,6 +4,13 @@
 <dict>
 	<key>Scroll</key>
 	<dict>
+		<key>appFilter</key>
+		<dict>
+			<key>bundleIDs</key>
+			<array/>
+			<key>mode</key>
+			<string>off</string>
+		</dict>
 		<key>modifiers</key>
 		<dict>
 			<key>horizontal</key>
@@ -77,7 +84,7 @@
 	<key>Constants</key>
 	<dict>
 		<key>configVersion</key>
-		<integer>24</integer>
+		<integer>25</integer>
 		<key>defaultRemaps</key>
 		<dict>
 			<key>threeButtons</key>

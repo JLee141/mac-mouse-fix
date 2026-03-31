@@ -20,10 +20,13 @@ class ScrollTabController: NSViewController {
     var reverseDirection = ConfigValue<Bool>(configPath: "Scroll.reverseDirection")
     var scrollSpeed = ConfigValue<String>(configPath: "Scroll.speed")
     var precise = ConfigValue<Bool>(configPath: "Scroll.precise")
+    var appFilterMode = ConfigValue<String>(configPath: "Scroll.appFilter.mode")
     var horizontalMod = ConfigValue<UInt>(configPath: "Scroll.modifiers.horizontal")
     var zoomMod = ConfigValue<UInt>(configPath: "Scroll.modifiers.zoom")
     var swiftMod = ConfigValue<UInt>(configPath: "Scroll.modifiers.swift")
     var preciseMod = ConfigValue<UInt>(configPath: "Scroll.modifiers.precise")
+    
+    private weak var appFilterSummaryField: NSTextField?
     
     /// Also see `ReactiveFlags` is this doesn't work
     
@@ -220,6 +223,9 @@ class ScrollTabController: NSViewController {
             }
         }
         
+        /// App filter
+        installAppFilterSection()
+        
         /// Scrollwheel capture notifications
         /// Notes:
         /// - You can find discussion of the design-thoughts behind this inside `getCapturedButtonsAndExcludeButtonsThatAreOnlyCapturedByModifier:`
@@ -322,5 +328,158 @@ class ScrollTabController: NSViewController {
                 }
 //            }
         }
+    }
+    
+    private func installAppFilterSection() {
+        
+        let section = NSStackView()
+        section.orientation = .vertical
+        section.alignment = .leading
+        section.spacing = 4
+        section.translatesAutoresizingMaskIntoConstraints = false
+        section.setContentHuggingPriority(.required, for: .horizontal)
+        section.setContentCompressionResistancePriority(.required, for: .horizontal)
+        
+        let controlsRow = NSStackView()
+        controlsRow.orientation = .horizontal
+        controlsRow.alignment = .centerY
+        controlsRow.spacing = 6
+        controlsRow.translatesAutoresizingMaskIntoConstraints = false
+        controlsRow.setContentHuggingPriority(.required, for: .horizontal)
+        controlsRow.setContentCompressionResistancePriority(.required, for: .horizontal)
+        
+        let title = NSTextField(labelWithString: "App Filter:")
+        title.setContentHuggingPriority(.required, for: .horizontal)
+        title.setContentCompressionResistancePriority(.required, for: .horizontal)
+        
+        let filterModePopup = NSPopUpButton(frame: .zero, pullsDown: false)
+        filterModePopup.translatesAutoresizingMaskIntoConstraints = false
+        filterModePopup.setContentHuggingPriority(.required, for: .horizontal)
+        filterModePopup.setContentCompressionResistancePriority(.required, for: .horizontal)
+        filterModePopup.addItem(withTitle: "Off")
+        filterModePopup.lastItem?.identifier = NSUserInterfaceItemIdentifier("off")
+        filterModePopup.addItem(withTitle: "Ignore Selected Apps")
+        filterModePopup.lastItem?.identifier = NSUserInterfaceItemIdentifier("excludeListed")
+        filterModePopup.addItem(withTitle: "Only Use In Selected Apps")
+        filterModePopup.lastItem?.identifier = NSUserInterfaceItemIdentifier("includeListed")
+        
+        appFilterMode.bindingTarget <~ filterModePopup.reactive.selectedIdentifiers.map { $0?.rawValue ?? "off" }
+        filterModePopup.reactive.selectedIdentifier <~ appFilterMode.producer.map { NSUserInterfaceItemIdentifier($0) }
+        
+        let manageButton = NSButton(title: "Manage Apps…", target: self, action: #selector(openAppFilterManager))
+        manageButton.bezelStyle = .rounded
+        manageButton.setContentHuggingPriority(.required, for: .horizontal)
+        manageButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        
+        controlsRow.addArrangedSubview(title)
+        controlsRow.addArrangedSubview(filterModePopup)
+        controlsRow.addArrangedSubview(manageButton)
+        
+        let detailsStack = NSStackView()
+        detailsStack.orientation = .vertical
+        detailsStack.alignment = .leading
+        detailsStack.spacing = 4
+        detailsStack.translatesAutoresizingMaskIntoConstraints = false
+        detailsStack.setContentHuggingPriority(.required, for: .horizontal)
+        detailsStack.setContentCompressionResistancePriority(.required, for: .horizontal)
+        
+        let hint = CoolNSTextField(hintWithString: "Choose whether Mac Mouse Fix ignores selected apps or only runs in them.")
+        hint.lineBreakMode = .byWordWrapping
+        hint.cell?.wraps = true
+        hint.setContentCompressionResistancePriority(.init(999), for: .horizontal)
+        
+        let summary = CoolNSTextField(hintWithString: "")
+        summary.lineBreakMode = .byWordWrapping
+        summary.cell?.wraps = true
+        summary.setContentCompressionResistancePriority(.init(999), for: .horizontal)
+        appFilterSummaryField = summary
+        updateAppFilterSummary()
+        
+        ReactiveConfig.shared.producer.startWithValues { [weak self] _ in
+            self?.updateAppFilterSummary()
+        }
+        
+        detailsStack.addArrangedSubview(hint)
+        detailsStack.addArrangedSubview(summary)
+        
+        let detailsIndent = NSView()
+        detailsIndent.translatesAutoresizingMaskIntoConstraints = false
+        detailsIndent.setContentHuggingPriority(.required, for: .horizontal)
+        detailsIndent.setContentCompressionResistancePriority(.required, for: .horizontal)
+        detailsIndent.addSubview(detailsStack)
+        detailsStack.leadingAnchor.constraint(equalTo: detailsIndent.leadingAnchor, constant: 20).isActive = true
+        detailsStack.trailingAnchor.constraint(equalTo: detailsIndent.trailingAnchor).isActive = true
+        detailsStack.topAnchor.constraint(equalTo: detailsIndent.topAnchor).isActive = true
+        detailsStack.bottomAnchor.constraint(equalTo: detailsIndent.bottomAnchor).isActive = true
+        
+        do {
+            self.view.needsLayout = true
+            self.view.layoutSubtreeIfNeeded()
+            let detailsWidth = preciseSection.frame.width
+            detailsIndent.widthAnchor.constraint(equalToConstant: detailsWidth).addingIdentifier("appFilterDetailsWidth").isActive = true
+        }
+        
+        section.addArrangedSubview(controlsRow)
+        section.addArrangedSubview(detailsIndent)
+        
+        let keyboardModifiersIndex = max(masterStack.arrangedSubviews.count - 1, 0)
+        masterStack.insertArrangedSubview(section, at: keyboardModifiersIndex)
+    }
+    
+    @objc private func openAppFilterManager() {
+        OverridePanel.instance().begin()
+    }
+    
+    private func updateAppFilterSummary() {
+        
+        guard let field = appFilterSummaryField else { return }
+        
+        let mode = (config("Scroll.appFilter.mode") as? String) ?? "off"
+        let bundleIDs = currentAppFilterBundleIDs()
+        
+        if bundleIDs.isEmpty {
+            if mode == "includeListed" {
+                field.stringValue = "No apps selected. Scrolling enhancements will stay off until you add apps."
+            } else {
+                field.stringValue = "No apps selected."
+            }
+            return
+        }
+        
+        let names = bundleIDs.prefix(3).map(appName(bundleIdentifier:))
+        let namesString = names.joined(separator: ", ")
+        
+        if bundleIDs.count == 1 {
+            field.stringValue = "Selected app: \(namesString)"
+        } else if bundleIDs.count <= 3 {
+            field.stringValue = "Selected apps: \(namesString)"
+        } else {
+            field.stringValue = "\(bundleIDs.count) apps selected: \(namesString), …"
+        }
+    }
+    
+    private func currentAppFilterBundleIDs() -> [String] {
+        if let raw = config("Scroll.appFilter.bundleIDs") as? [String] {
+            return raw
+        }
+        if let raw = config("Scroll.appFilter.bundleIDs") as? [NSString] {
+            return raw.map { $0 as String }
+        }
+        if let raw = config("Scroll.appFilter.bundleIDs") as? NSArray {
+            return raw.compactMap { $0 as? String }
+        }
+        return []
+    }
+    
+    private func appName(bundleIdentifier: String) -> String {
+        guard let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) else {
+            return bundleIdentifier
+        }
+        
+        if let appName = Bundle(url: appURL)?.object(forInfoDictionaryKey: "CFBundleName") as? String, !appName.isEmpty {
+            return appName
+        }
+        
+        return appURL.deletingPathExtension().lastPathComponent
     }
 }

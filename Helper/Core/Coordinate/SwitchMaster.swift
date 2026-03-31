@@ -119,6 +119,9 @@ import ReactiveSwift
     private var buttonKillSwitch = false
     private var scrollKillSwitch = false
     
+    /// Derived from: Frontmost App + Scroll Config
+    private var defaultScrollModificationsAllowedInCurrentApp = true
+    
     //
     // MARK: Debug
     //
@@ -160,6 +163,7 @@ import ReactiveSwift
         latestRemaps = Remap.remaps
         latestScrollConfig = ScrollConfig.shared
         latestModifiers = Modifiers.modifiers(with: nil)
+        defaultScrollModificationsAllowedInCurrentApp = appFilterAllowsDefaultScrollModifications(bundleIdentifier: HelperState.shared.frontmostAppBundleIdentifier)
         
         /// Debug
         logWithState("Initialized.")
@@ -230,6 +234,21 @@ import ReactiveSwift
                 New state - userIsActive: \(userIsActiveNew)
                 """)
         }
+    }
+    
+    @objc func activeAppChanged(bundleIdentifier: String?) {
+        
+        let allows = appFilterAllowsDefaultScrollModifications(bundleIdentifier: bundleIdentifier)
+        guard allows != defaultScrollModificationsAllowedInCurrentApp else { return }
+        
+        defaultScrollModificationsAllowedInCurrentApp = allows
+        toggleScrollTap()
+        
+        logWithState("""
+            Toggled due to frontmost app change.
+            New app: \(bundleIdentifier ?? "<none>")
+            Default scroll modifications allowed: \(allows)
+            """)
     }
     
     //
@@ -373,6 +392,7 @@ import ReactiveSwift
         
         /// Store latest
         latestScrollConfig = scrollConfig
+        defaultScrollModificationsAllowedInCurrentApp = appFilterAllowsDefaultScrollModifications(bundleIdentifier: HelperState.shared.frontmostAppBundleIdentifier)
         
         /// Call togglers
         ///     Note: [Mar 2025] Problem(?): Shouldn't we call toggleButtonTap() here, since we call toggleBtnModProcessing()
@@ -465,6 +485,35 @@ import ReactiveSwift
 
     }
     
+    private func appFilterAllowsDefaultScrollModifications(bundleIdentifier: String?) -> Bool {
+        
+        let mode = (config("Scroll.appFilter.mode") as? String) ?? "off"
+        
+        let bundleIDs: [String] = {
+            if let raw = config("Scroll.appFilter.bundleIDs") as? [String] {
+                return raw
+            }
+            if let raw = config("Scroll.appFilter.bundleIDs") as? [NSString] {
+                return raw.map { $0 as String }
+            }
+            if let raw = config("Scroll.appFilter.bundleIDs") as? NSArray {
+                return raw.compactMap { $0 as? String }
+            }
+            return []
+        }()
+        
+        let isListed = bundleIdentifier.map(bundleIDs.contains) ?? false
+        
+        switch mode {
+        case "excludeListed":
+            return !isListed
+        case "includeListed":
+            return isListed
+        default:
+            return true
+        }
+    }
+    
     //
     // MARK: Tap togglers
     //
@@ -532,7 +581,9 @@ import ReactiveSwift
             return
         }
         
-        if someDeviceHasScroll && (defaultModifiesScroll || currentModificationModifiesScroll) {
+        let defaultScrollActive = defaultModifiesScroll && defaultScrollModificationsAllowedInCurrentApp
+        
+        if someDeviceHasScroll && (defaultScrollActive || currentModificationModifiesScroll) {
             Scroll.startReceiving()
         } else {
             Scroll.stopReceiving()

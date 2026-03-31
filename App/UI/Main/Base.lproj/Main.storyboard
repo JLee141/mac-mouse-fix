@@ -2625,6 +2625,7 @@ Also see CFBundleName in InfoPlist.xcstrings.</string>
                         <fragment content="Toolbar &gt; About Tab Title"/>
                     </attributedString>
                     <connections>
+                        <outlet property="creditsField" destination="5x2-rm-Zzf" id="C2m-KY-0Yl"/>
                         <outlet property="moneyCell" destination="15g-eT-Sq8" id="zZ1-w3-fe4"/>
                         <outlet property="moneyCellImage" destination="dnN-4Q-oW6" id="Wfc-ft-E3q"/>
                         <outlet property="moneyCellLink" destination="X0k-mF-gia" id="Rnt-tA-JLe"/>

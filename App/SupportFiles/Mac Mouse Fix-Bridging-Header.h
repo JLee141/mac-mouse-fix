@@ -48,6 +48,7 @@
 #import "NSView+Additions.h"
 #import "NSScreen+Additions.h"
 #import "CaptureToasts.h"
+#import "OverridePanel.h"
 #import "NSString+Steganography.h"
 #import "NSString+Additions.h"
 #import "IBUtility.h"

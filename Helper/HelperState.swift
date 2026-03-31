@@ -9,6 +9,7 @@
 
 /// This class holds global state. Use sparingly!
 
+import AppKit
 import Foundation
 import CoreGraphics
 
@@ -19,6 +20,7 @@ import CoreGraphics
     override init() {
         super.init()
         initUserIsActive()
+        initFrontmostApp()
         DispatchQueue.main.async { /// Need to do this to avoid strange Swift crashes when this is triggered from `SwitchMaster.load_Manual()`
             SwitchMaster.shared.helperStateChanged()
         }
@@ -52,6 +54,26 @@ import CoreGraphics
         guard let d = CGSessionCopyCurrentDictionary() as NSDictionary? else { return false }
         guard let result = d.value(forKey: kCGSessionOnConsoleKey) as? Bool else { return false } /// [Mar 2025] why 'kCGSessionOnConsoleKey'? – that's weird... Here's an SO post that also mentions this: https://stackoverflow.com/a/8790102/10601702
         return result
+    }
+    
+    // MARK: Frontmost app
+    
+    @objc private(set) var frontmostAppBundleIdentifier: String? = nil
+    
+    private func initFrontmostApp() {
+        
+        frontmostAppBundleIdentifier = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+        
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: nil) { notification in
+            let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            self.handleFrontmostAppDidChange(bundleIdentifier: app?.bundleIdentifier)
+        }
+    }
+    
+    private func handleFrontmostAppDidChange(bundleIdentifier: String?) {
+        guard frontmostAppBundleIdentifier != bundleIdentifier else { return }
+        frontmostAppBundleIdentifier = bundleIdentifier
+        SwitchMaster.shared.activeAppChanged(bundleIdentifier: bundleIdentifier)
     }
     
     // MARK: Active device

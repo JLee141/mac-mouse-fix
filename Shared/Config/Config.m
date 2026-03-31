@@ -572,6 +572,22 @@ NSDictionary *_Nullable _readDictPlist(NSURL *url, bool mutable, NSError * __aut
                     
                     currentVersion = 24;
                     
+                } else if (currentVersion == 24) {
+                    
+                    /// 24 -> 25
+                    ///     Adds defaults for the scroll app filter.
+                    
+                    log(Info, "Upgrading configVersion from 24 to 25...");
+                    
+                    if (config(@"Scroll.appFilter.mode") == nil) {
+                        setConfig(@"Scroll.appFilter.mode", @"off");
+                    }
+                    if (config(@"Scroll.appFilter.bundleIDs") == nil) {
+                        setConfig(@"Scroll.appFilter.bundleIDs", @[]);
+                    }
+                    
+                    currentVersion = 25;
+                    
                 } else {
                     
                     log(Info, "No upgrades from configVersion %d. Target is %d.", currentVersion, targetVersion);

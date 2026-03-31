@@ -16,6 +16,7 @@ class AboutTabController: NSViewController {
     /// Outlets and vars
     
     @IBOutlet weak var versionField: NSTextField!
+    @IBOutlet weak var creditsField: NSTextField!
     
     @IBOutlet weak var moneyCell: NSView!
     @IBOutlet weak var moneyCellLink: Hyperlink!
@@ -34,6 +35,8 @@ class AboutTabController: NSViewController {
     var currentTrialState: MFTrialState? = nil
 
     private var trackingArea: NSTrackingArea? = nil
+    
+    private let remixAuthorName = "JLee ✌🏼"
     
     /// IBActions
     
@@ -96,6 +99,8 @@ class AboutTabController: NSViewController {
         let versionFormatExists = versionFormat.count != 0 && versionFormat != "app-version"
         let versionNumbers = "\(Locator.bundleVersionShort()) (\(Locator.bundleVersion()))"
         versionField.stringValue = versionFormatExists ? String(format: versionFormat, versionNumbers) : versionNumbers
+        
+        creditsField.stringValue = "Remixed by \(remixAuthorName)"
         
         /// Init trialSectionManager
         ///     The manager swaps out the trialSection and stuff, so always access the trialSection through the manager!

@@ -443,21 +443,25 @@ class TabViewController: NSTabViewController {
             /// Get screenshot and store it in imageView
             ///  \discussion Neither `takeImage()` nor `imageWithoutWindowBackground()` work properly. They don't retain the right color of the groupRows of the actionTable and the fillColor of the addField color. I think the addField issue only started appearing after we updated the addField coloring to support desktop tinting. Neither of the two actually seem to capture the background
             
-            let imageOfOriginTab = originTab.takeScreenshot()
-            let v = NSImageView() /// We have to create a new imageView each time for some reason
-            v.imageScaling = .scaleNone
-            v.frame = originTab.frame
-            v.image = imageOfOriginTab
-            unselectedTabImageView = v
-            
-            /// Draw imageView
-            ///     Need to draw in willSelect. didSelect doesn't work for some reason
-            destinationTab.addSubview(unselectedTabImageView)
-            
-            /// Add constraints to imageView
-            unselectedTabImageView.translatesAutoresizingMaskIntoConstraints = false
-            unselectedTabImageView.centerYAnchor.constraint(equalTo: destinationTab.centerYAnchor).isActive = true
-            unselectedTabImageView.centerXAnchor.constraint(equalTo: destinationTab.centerXAnchor).isActive = true
+            if let imageOfOriginTab = originTab.takeScreenshot() {
+                let v = NSImageView() /// We have to create a new imageView each time for some reason
+                v.imageScaling = .scaleNone
+                v.frame = originTab.frame
+                v.image = imageOfOriginTab
+                unselectedTabImageView = v
+                
+                /// Draw imageView
+                ///     Need to draw in willSelect. didSelect doesn't work for some reason
+                destinationTab.addSubview(unselectedTabImageView)
+                
+                /// Add constraints to imageView
+                unselectedTabImageView.translatesAutoresizingMaskIntoConstraints = false
+                unselectedTabImageView.centerYAnchor.constraint(equalTo: destinationTab.centerYAnchor).isActive = true
+                unselectedTabImageView.centerXAnchor.constraint(equalTo: destinationTab.centerXAnchor).isActive = true
+            } else {
+                unselectedTabImageView = NSImageView()
+                unselectedTabImageView.isHidden = true
+            }
         }
         
         /// Store old tab size
